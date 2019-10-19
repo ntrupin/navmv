@@ -39,6 +39,8 @@ Variables can only be assigned through user input or through usage of `xchg`, an
 
 **div** : divides the destination register by the source value.
 
+**mod** : moves the remainder of destination/source to the destination register.
+
 **shl** : left-shifts the destination register by the source value.
 
 **shr** : right-shifts the destination register by the source value.
