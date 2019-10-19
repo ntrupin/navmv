@@ -380,8 +380,25 @@ fn interpret(program string) {
 }
 
 fn main() {
-    program := os.read_file(os.args[1]) or {
-        panic(err)
+    if os.args.len >= 2 {
+        if os.args[1] == "run" && os.args.len>=3 {
+            program := os.read_file(os.args[2]) or {
+                panic(err)
+            }
+            interpret(program.replace("    ", "").replace("  ", ""))
+        } else if os.args[1] == "help" {
+            println("
+COMMANDS
+-----------------------------
+run   | Executes the provided file.
+      | navmv run ./tests/loop.asm
+help  | Displays the help menu.
+      | navmv help
+")
+        } else {
+            println("Usage: navmv run [FILE]")
+        }
+    } else {
+        println("Usage: navmv run [FILE]")
     }
-    interpret(program.replace("    ", "").replace("  ", ""))
 }
