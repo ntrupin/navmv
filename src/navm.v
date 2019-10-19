@@ -358,7 +358,7 @@ fn interpret(program string) {
                     i+=1
                     continue
                 }
-                mem[btos(reg["cx"])] = stob(uinput)
+                mem[btos(reg["cx"])] = stob(uinput.replace("\n", ""))
             }
         } else if cmd == "nop" {
             i+=1
@@ -376,29 +376,90 @@ fn interpret(program string) {
         }
         i+=1
     }
-    println(reg.str())
+}
+
+fn repl(prog string) {
+    mut program := prog
+    mut cmd := readline.read_line(">>> ") or {
+        panic("Could not read user input")
+    }
+    cmd = cmd.replace("\n", "")
+    mut args := ""
+    if cmd.contains(" ") && cmd[0].str() == "," {
+        args = cmd.split(" ")[1]
+        cmd = cmd.split(" ")[0]
+    }
+    if cmd == ",show" {
+        if program == "\n" {
+            println("
+Your program is empty. Add some functions to get started.
+
+Hint: '_start:' is always a good first line.
+")
+        } else {
+            println(program)
+        }
+    } else if cmd == ",exec" {
+        println("Running script...\n")
+        if args != "" {
+            fileprog := os.read_file(args) or {
+                panic('Could not read file at ${args}')
+            }
+            interpret(fileprog.replace("    ", "").replace("  ", ""))
+        } else {
+            interpret(program.replace("    ", "").replace("  ", ""))
+        }
+    } else if cmd == ",clear" {
+        program = "\n"
+        println("Program cleared")
+    } else if cmd == ",undo" {
+        if program != "\n" {
+            removed := program.split("\n")[program.split("\n").len-1].replace("    ", "").replace("  ", "")
+            program = "\n" + program.split("\n").slice(0,program.split("\n").len-1).join("\n")
+            if program != "\n" {
+                program += "\n"
+            }
+            println('undo: removed "${removed}"')
+        }
+    } else if cmd == ",help" {
+        println("
+,help       Displays this menu
+,clear      Clears the cached program
+,exec       Executes the cached program
+      [FILE]Executes the given file
+,undo       Removes the most recent line
+")  
+    } else {
+        if cmd.contains(":") {
+            program += cmd + "\n"
+        }
+        else {
+            program += "    " + cmd + "\n"
+        }
+    }
+    repl(program)
 }
 
 fn main() {
     if os.args.len >= 2 {
         if os.args[1] == "run" && os.args.len>=3 {
             program := os.read_file(os.args[2]) or {
-                panic(err)
+                panic('Could not read file at ${os.args[2]}')
             }
             interpret(program.replace("    ", "").replace("  ", ""))
         } else if os.args[1] == "help" {
             println("
-COMMANDS
------------------------------
-run   | Executes the provided file.
-      | navmv run ./tests/loop.asm
-help  | Displays the help menu.
-      | navmv help
+run         Executes the provided file.
+help        Displays the help menu.
 ")
         } else {
             println("Usage: navmv run [FILE]")
         }
     } else {
-        println("Usage: navmv run [FILE]")
+        println("
+NAVMV REPL v0.1.1
+Type ,help for a command list  
+")
+        repl("\n")
     }
 }
