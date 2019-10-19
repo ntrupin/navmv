@@ -166,7 +166,7 @@ fn binmul(x string, y string) string {
 
 fn interpret(program string) {
     mut stack := create_stack(8000)
-    lines := program.split("\n")
+    mut lines := program.split("\n")
     mut reg := map[string]string
     reg['ax'] = ""
     reg['bx'] = ""
@@ -190,6 +190,13 @@ fn interpret(program string) {
         for !lines[i].contains("_start:") {
             if lines[i].contains(".dec ") {
                 mem[lines[i].split(" ")[1]] = stob(lines[i].split(" ").slice(2,lines[i].split(" ").len).join(" "))
+            } else if lines[i].contains(".inc ") {
+                mut file := os.read_file(lines[i].split(" ")[1]) or {
+                    panic(err)
+                }
+                file = file.replace("    ", "").replace("  ", "")
+                lines = (file + ("\n" + lines.join("\n"))).split("\n")
+                i=i+file.split("\n").len
             }
             i+=1
         }
@@ -335,7 +342,7 @@ fn interpret(program string) {
         } else if cmd == "call" {
             cf = i
             i = 0
-            for lines[i] != (args[0] & ":") {
+            for lines[i] != (args[0] + ":") {
                 i+=1
             }
         } else if cmd == "syscall" {

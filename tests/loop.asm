@@ -11,9 +11,6 @@ section .data:
     .dec HELPRES 0x10Help Menu0x10------------------------------
     .dec EXITCMD exit
     .dec EXITMAN exit | exits the session
-    .dec FIZZBUZZCMD fizzbuzz
-    .dec FIZZBUZZMAN fizzbuzz | FizzBuzz, anybody?
-    .inc lib/fun/fizzbuzz.asm
 
 _start:
     mov ax, 1
@@ -37,8 +34,6 @@ _repl:
     je _help
     cmp cx, [EXITCMD]
     je _exit
-    cmp cx, [FIZZBUZZCMD]
-    je _fizzbuzz
     jne _invalid
     jmp _repl
 _info:
@@ -60,9 +55,6 @@ _help:
     syscall
     mov cx, [BLANK]
     syscall
-    jmp _repl
-_fizzbuzz:
-    call fizzbuzz
     jmp _repl
 _invalid:
     mov ax, 1
