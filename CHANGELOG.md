@@ -3,6 +3,7 @@
 - Implemented a simple REPL for building and executing programs.
 - Fixed a bug where string-to-binary was missing left zero-padding.
 - Expanded data section to allow file inclusion.
+- Added support for http-related read syscalls.
 
 ## v0.1.0
 *Initial Release* - *19 Oct 2019*

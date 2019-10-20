@@ -1,5 +1,8 @@
+module main
+
 import os
 import readline
+import http
 
 struct Stack {
 	mut: top int
@@ -346,19 +349,32 @@ fn interpret(program string) {
                 i+=1
             }
         } else if cmd == "syscall" {
-            if btos(reg["bx"]) == "1" {
-                stdo := btos(reg["cx"]).replace("0x10", "\n")
-                if stdo[stdo.len-1].str() == '/' {
-                    print(stdo.substr(0,stdo.len-1))
-                } else {
-                    println(stdo)
+            if btos(reg["ax"]) == "1" {
+                if btos(reg["bx"]) == "1" {
+                    stdo := btos(reg["cx"]).replace("0x10", "\n")
+                    if stdo[stdo.len-1].str() == '/' {
+                        print(stdo.substr(0,stdo.len-1))
+                    } else {
+                        println(stdo)
+                    }
                 }
-            } else if btos(reg["bx"]) == "0" {
-                uinput := readline.read_line("") or {
+            } else if btos(reg["ax"]) == "0" {
+                if btos(reg["bx"]) == "0" {
+                    uinput := readline.read_line("") or {
+                        i+=1
+                        continue
+                    }
+                    mem[btos(reg["cx"])] = stob(uinput.replace("\n", ""))
+                } else if btos(reg["bx"]).contains("http://") {
+                    println("NAVM does not support making non-secure http requests.")
                     i+=1
                     continue
+                } else if btos(reg["bx"]).contains("https://") {
+                    resp := http.get(btos(reg["bx"])) or {
+	                    panic(err)
+                    }
+                    mem[btos(reg["cx"])] = stob(resp.text)
                 }
-                mem[btos(reg["cx"])] = stob(uinput.replace("\n", ""))
             }
         } else if cmd == "nop" {
             i+=1
@@ -375,6 +391,9 @@ fn interpret(program string) {
             }
         }
         i+=1
+    }
+    if os.args.len >= 4 && os.args[3] == "-d" {
+        println(reg) 
     }
 }
 
@@ -456,10 +475,10 @@ help        Displays the help menu.
             println("Usage: navmv run [FILE]")
         }
     } else {
-        println("
+        println('
 NAVMV REPL v0.1.1
 Type ,help for a command list  
-")
+')
         repl("\n")
     }
 }
