@@ -230,7 +230,7 @@ fn interpret(program string) {
             cmd = line
         }
         if line.contains(", ") {
-            args << line.substr(4,line.len).split(", ")
+            args << line.split(" ").slice(1, line.split(" ").len).join(" ").split(", ")
         } else {
             if line.contains(" ") {
                 args << line.split(" ")[1]
