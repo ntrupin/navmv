@@ -291,7 +291,7 @@ fn interpret(program string) {
         } else if cmd == "inc" {
             reg[args[0]] = stob((btos(reg[args[0]]).int() + 1).str())
         } else if cmd == "dec" {
-            reg[args[0]] = stob((btos(reg[args[0]]).int() - args[1].int()).str())
+            reg[args[0]] = stob((btos(reg[args[0]]).int() - 1).str())
         } else if cmd == "jmp" {
             i = 0
             for lines[i] != (args[0] + ":") {
@@ -405,7 +405,7 @@ fn repl(prog string) {
     cmd = cmd.replace("\n", "")
     mut args := ""
     if cmd.contains(" ") && cmd[0].str() == "," {
-        args = cmd.split(" ")[1]
+        args = cmd.split(" ").slice(1, cmd.split(" ").len).join(" ")
         cmd = cmd.split(" ")[0]
     }
     if cmd == ",show" {
@@ -416,7 +416,17 @@ Your program is empty. Add some functions to get started.
 Hint: '_start:' is always a good first line.
 ")
         } else {
-            println(program)
+            mut ln := 1
+            for line in program.split("\n") {
+                mut lnpr := ln.str() + "  "
+                if ln >= 10 && ln < 100 {
+                    lnpr = ln.str() + " "
+                } else if ln >= 100 {
+                    lnpr = ln.str()
+                }
+                println('$lnpr| $line')
+                ln+=1
+            }
         }
     } else if cmd == ",exec" {
         println("Running script...\n")
@@ -431,6 +441,14 @@ Hint: '_start:' is always a good first line.
     } else if cmd == ",clear" {
         program = "\n"
         println("Program cleared")
+    } else if cmd == ",sub" {
+        mut newprog := program.split("\n")
+        if args.contains(":") {
+            newprog[args.split(" ")[0].int()-1] = args.split(" ").slice(1, args.split(" ").len).join(" ")
+        } else {
+            newprog[args.split(" ")[0].int()-1] = "    " + args.split(" ").slice(1, args.split(" ").len).join(" ")
+        }
+        program = newprog.join("\n")
     } else if cmd == ",undo" {
         if program != "\n" {
             removed := program.split("\n")[program.split("\n").len-1].replace("    ", "").replace("  ", "")
@@ -457,6 +475,10 @@ Hint: '_start:' is always a good first line.
         }
     }
     repl(program)
+}
+
+fn printhi() {
+	println("Hi")
 }
 
 fn main() {
