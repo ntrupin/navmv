@@ -144,12 +144,12 @@ fn btos(input string) string {
 }
 
 fn binarith(ix string, iy string, operator string) string {
-	x := btos(ix)
-	y := iy
+    x := btos(ix)
+    y := iy
     if x[0].is_digit() && y[0].is_digit() {
         if operator == "add" {
-			return stob((x.f32() + y.f32()).str())
-		} else if operator == "sub" {
+            return stob((x.f32() + y.f32()).str())
+        } else if operator == "sub" {
 			return stob((x.f32() - y.f32()).str())
 		} else if operator == "mul" {
 			return stob((x.f32() * y.f32()).str())
@@ -157,38 +157,38 @@ fn binarith(ix string, iy string, operator string) string {
 			return stob((x.f32() / y.f32()).str())
 		}
     } else {
-		if operator == "add" {
-			return stob(x + y)
-		} else if operator == "sub" {
-			return stob(x.replace(y, ""))
-		} else if operator == "mul" {
-			return stob(x.repeat(y.int()))
-		} else if operator == "div" {
-			return stob(x)
-		}
+        if operator == "add" {
+            return stob(x + y)
+        } else if operator == "sub" {
+            return stob(x.replace(y, ""))
+        } else if operator == "mul" {
+            return stob(x.repeat(y.int()))
+        } else if operator == "div" {
+            return stob(x)
+        }
     }
-	return ""
+    return ""
 }
 
 fn binbit(ix string, iy string, operator string) string {
-	x := btos(ix)
-	y := iy
+    x := btos(ix)
+    y := iy
     if x[0].is_digit() && y[0].is_digit() {
         if operator == "and" {
-			return stob((x.int() & y.int()).str())
-		} else if operator == "or" {
-			return stob((x.int() | y.int()).str())
-		} else if operator == "xor" {
-			return stob((x.int() ^ y.int()).str())
-		} else if operator == "shl" {
-			return stob((x.int() << y.int()).str())
-		} else if operator == "shr" {
-			return stob((x.int() >> y.int()).str())
-		}
+            return stob((x.int() & y.int()).str())
+        } else if operator == "or" {
+            return stob((x.int() | y.int()).str())
+        } else if operator == "xor" {
+            return stob((x.int() ^ y.int()).str())
+        } else if operator == "shl" {
+            return stob((x.int() << y.int()).str())
+        } else if operator == "shr" {
+            return stob((x.int() >> y.int()).str())
+        }
     } else {
-		return stob(x)
+        return stob(x)
     }
-	return ""
+    return ""
 }
 
 fn interpret(program string) {
