@@ -7,7 +7,7 @@ import http
 struct Stack {
 	mut: top int
 	capacity int
-    array []string
+	array []string
 }
 
 fn create_stack(capacity int) Stack {
