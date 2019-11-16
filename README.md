@@ -23,7 +23,7 @@ Constants cannot be reassigned at runtime.
 
 ## variables
 
-Variables can only be assigned through user input or through usage of `xchg`, and caan be referenced within the program using `[NAME]`. However, at initial assignment, they are referenced by `NAME`.
+Variables can only be assigned through user input, and can be referenced within the program using `[NAME]`. However, at initial assignment, they are referenced by `NAME`.
 
 ## opcodes
 
@@ -78,3 +78,5 @@ Variables can only be assigned through user input or through usage of `xchg`, an
 **nop** : do nothing.
 
 **xchg** : exchange the values in the destination and source registers.
+
+**dbg** : print a debug message.

@@ -1,8 +1,4 @@
 fact:
-    push bx
-    push cx
-    push dx
-    mov cx, ax
     jmp fact_enter
 fact_enter:
     cmp cx, 1

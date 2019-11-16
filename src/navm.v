@@ -6,15 +6,15 @@ import http
 
 struct Stack {
 	mut: top int
-	     capacity int
-         array []string
+	capacity int
+    array []string
 }
 
 fn create_stack(capacity int) Stack {
     stack := Stack {
         top: -1
         capacity: capacity
-        array: []string
+        array: []
     }
     return stack
 }
@@ -143,38 +143,62 @@ fn btos(input string) string {
     return str
 }
 
-fn binadd(x string, y string) string {
+fn binarith(ix string, iy string, operator string) string {
+	x := btos(ix)
+	y := iy
     if x[0].is_digit() && y[0].is_digit() {
-        return stob((x.int() + y.int()).str())
+        if operator == "add" {
+			return stob((x.f32() + y.f32()).str())
+		} else if operator == "sub" {
+			return stob((x.f32() - y.f32()).str())
+		} else if operator == "mul" {
+			return stob((x.f32() * y.f32()).str())
+		} else if operator == "div" {
+			return stob((x.f32() / y.f32()).str())
+		}
     } else {
-        return stob(x + y)
+		if operator == "add" {
+			return stob(x + y)
+		} else if operator == "sub" {
+			return stob(x.replace(y, ""))
+		} else if operator == "mul" {
+			return stob(x.repeat(y.int()))
+		} else if operator == "div" {
+			return stob(x)
+		}
     }
+	return ""
 }
 
-fn binsub(x string, y string) string {
+fn binbit(ix string, iy string, operator string) string {
+	x := btos(ix)
+	y := iy
     if x[0].is_digit() && y[0].is_digit() {
-        return stob((x.int() - y.int()).str())
+        if operator == "and" {
+			return stob((x.int() & y.int()).str())
+		} else if operator == "or" {
+			return stob((x.int() | y.int()).str())
+		} else if operator == "xor" {
+			return stob((x.int() ^ y.int()).str())
+		} else if operator == "shl" {
+			return stob((x.int() << y.int()).str())
+		} else if operator == "shr" {
+			return stob((x.int() >> y.int()).str())
+		}
     } else {
-        return stob(x.replace(y, ""))
+		return stob(x)
     }
-}
-
-fn binmul(x string, y string) string {
-    if x[0].is_digit() && y[0].is_digit() {
-        return stob((x.int() * y.int()).str())
-    } else {
-        return stob(x.repeat(y.int()))
-    }
+	return ""
 }
 
 fn interpret(program string) {
     mut stack := create_stack(8000)
     mut lines := program.split("\n")
     mut reg := map[string]string
-    reg['ax'] = ""
-    reg['bx'] = ""
-    reg['cx'] = ""
-    reg['dx'] = ""
+    reg["ax"] = ""
+    reg["bx"] = ""
+    reg["cx"] = ""
+    reg["dx"] = ""
     mut mem := map[string]string
     mut cmd := ""
     mut args := []string
@@ -213,13 +237,16 @@ fn interpret(program string) {
             return
         }
     }
+	arith_cmds := ["add", "sub", "mul", "div"]
+	bit_cmds := ["and", "or", "xor", "shl", "shr"]
+	cmp_cmds := ["eq"]
     for i < lines.len {
         line = lines[i]
         if line[line.len-1].str() == " " {
             line = line.substr(0, line.len-1)
         }
         cmd = ""
-        args = []string
+        args = []
         if line == "" || line.contains(";") {
             i+=1
             continue
@@ -240,54 +267,40 @@ fn interpret(program string) {
         }
         if args.len >= 2 {
             if (args[1] == "ax" || 
-               args[1] == "bx" ||
-               args[1] == "cx" ||
-               args[1] == "dx") && 
+                args[1] == "bx" ||
+                args[1] == "cx" ||
+                args[1] == "dx") && 
                (!args[1].contains("[") &&
-               !args[1].contains("]")) {
-                   args[1] = btos(reg[args[1]])
+                !args[1].contains("]")) {
+            	args[1] = btos(reg[args[1]])
             } else if args[1].contains("[") &&
                       args[1].contains("]") {
-                          args[1] = btos(mem[args[1].replace("[", "").replace("]", "")])
+                args[1] = btos(mem[args[1].replace("[", "").replace("]", "")])
             }
             if (args[0] != "ax" && 
                args[0] != "bx" &&
                args[0] != "cx" &&
                args[0] != "dx") && 
-               (!args[0].contains("[") &&
+              (!args[0].contains("[") &&
                !args[0].contains("]")) {
-                    println('Line ${i+1} : Invalid register "${args[0]}" : halting assembler')
-                    return
+                println('Line ${i+1} : Invalid register "${args[0]}" : halting assembler')
+                return
             }
         }
         if cmd == "mov" {
             reg[args[0]] = stob(args[1])
         } else if cmd == "cmp" {
-            if reg[args[0]] == stob(args[1]) {
+            if reg[args[0]] == stob(args[1].f32().str()) {
                 psw = 1 
             } else {
                 psw = 0 
             }
-        } else if cmd == "add" {
-            reg[args[0]] = binadd(btos(reg[args[0]]), args[1])
-        } else if cmd == "sub" {
-            reg[args[0]] = binsub(btos(reg[args[0]]), args[1])
-        } else if cmd == "mul" {
-            reg[args[0]] = binmul(btos(reg[args[0]]), args[1])
-        } else if cmd == "div" {
-            reg[args[0]] = stob((btos(reg[args[0]]).int() / args[1].int()).str())
+        } else if arith_cmds.index(cmd) != -1 {
+            reg[args[0]] = binarith(reg[args[0]], args[1], cmd)
         } else if cmd == "mod" {
             reg[args[0]] = stob((btos(reg[args[0]]).int() % args[1].int()).str())
-        } else if cmd == "shl" {
-            reg[args[0]] = stob((btos(reg[args[0]]).int() << args[1].int()).str())
-        } else if cmd == "shr" {
-            reg[args[0]] = stob((btos(reg[args[0]]).int() % args[1].int()).str())
-        } else if cmd == "xor" {
-            reg[args[0]] = stob((btos(reg[args[0]]).int() ^ args[1].int()).str())
-        } else if cmd == "and" {
-            reg[args[0]] = stob((btos(reg[args[0]]).int() & args[1].int()).str())
-        } else if cmd == "or" {
-            reg[args[0]] = stob((btos(reg[args[0]]).int() | args[1].int()).str())
+        } else if bit_cmds.index(cmd) != -1 {
+			reg[args[0]] = binbit(reg[args[0]], args[1], cmd)
         } else if cmd == "inc" {
             reg[args[0]] = stob((btos(reg[args[0]]).int() + 1).str())
         } else if cmd == "dec" {
@@ -384,7 +397,9 @@ fn interpret(program string) {
             second := reg[args[1]]
             reg[args[0]] = first
             reg[args[1]] = second
-        } else {
+        } else if cmd == "dbg" {
+			println('DEBUG: ${args[0]}')
+		} else {
             if !cmd.contains(":") {
                 println('Line ${i+1} : Invalid operation "${cmd}" : halting assembler')
                 return
@@ -436,7 +451,9 @@ Hint: '_start:' is always a good first line.
             }
             interpret(fileprog.replace("    ", "").replace("  ", ""))
         } else {
-            interpret(program.replace("    ", "").replace("  ", ""))
+            if program != "\n" {
+				interpret(program.replace("    ", "").replace("  ", ""))
+			}
         }
     } else if cmd == ",clear" {
         program = "\n"
